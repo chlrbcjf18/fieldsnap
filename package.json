@@ -2,7 +2,7 @@
   "name": "fieldsnap-app",
   "version": "1.0.0",
   "private": true,
-  "description": "현장스냅 - 현장 사진 자동번호 정리 앱",
+  "description": "현장사진어플 - 현장 사진 자동번호 정리 앱",
   "devDependencies": {
     "@capacitor/cli": "6.2.1"
   },

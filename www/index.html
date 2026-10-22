@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#0f6e56">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="현장스냅">
+<meta name="apple-mobile-web-app-title" content="현장사진어플">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>현장스냅</title>
+<title>현장사진어플</title>
 <style>html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -182,7 +182,7 @@ async function render(){
 async function renderHome(){
   const sites=(await S.sites()).sort((a,b)=>b.updated-a.updated);
   const all=await S.allPhotos();const cnt={};all.forEach(p=>cnt[p.site]=(cnt[p.site]||0)+1);
-  $('hdr').innerHTML=`<h1>현장스냅 <span class="sub">현장별 사진 자동 번호·정리</span></h1><button class="ib" id="setBtn" aria-label="설정">${I.gear}</button>`;
+  $('hdr').innerHTML=`<h1>현장사진어플 <span class="sub">현장별 사진 자동 번호·정리</span></h1><button class="ib" id="setBtn" aria-label="설정">${I.gear}</button>`;
   $('setBtn').onclick=openSettings;
   $('main').innerHTML=sites.length?`<div class="stack">${sites.map(s=>`<button class="card site" data-id="${s.id}"><div class="n"><div class="t">${esc(s.name)}</div><div class="m">${esc(s.type)} · ${esc(s.date)}${s.facility?' · '+esc(s.facility):''}</div></div><div class="cnt">${cnt[s.id]||0}장</div></button>`).join('')}</div>`
     :`<div class="empty"><b>등록된 현장이 없습니다</b>아래 버튼으로 현장(용역)을 만들고 촬영을 시작하세요.<br>촬영 즉시 부재코드별 번호가 붙습니다. 예: <span style="font-family:var(--mono)">GD-003</span></div>`;
@@ -353,10 +353,10 @@ async function saveFile(filename,data){
   if(cap&&cap.isNativePlatform&&cap.isNativePlatform()){
     const FS=cap.Plugins&&cap.Plugins.Filesystem;if(!FS)throw new Error('파일 플러그인 없음');
     const b64=await blobToB64(blob);
-    const r=await FS.writeFile({path:'현장스냅/'+filename,data:b64,directory:'DOCUMENTS',recursive:true});
+    const r=await FS.writeFile({path:'현장사진어플/'+filename,data:b64,directory:'DOCUMENTS',recursive:true});
     const Sh=cap.Plugins&&cap.Plugins.Share;
     if(Sh){try{await Sh.share({title:filename,files:[r.uri]});}catch(e){}}
-    toast('내 파일 > Documents > 현장스냅 에 저장됨',3500);return {status:'saved'};
+    toast('내 파일 > Documents > 현장사진어플 에 저장됨',3500);return {status:'saved'};
   }
   const f=new File([blob],filename,{type:blob.type||'application/octet-stream'});
   if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:filename});return {status:'saved'};}catch(e){if(e.name==='AbortError')throw Object.assign(new Error('취소'),{code:'declined'});}}
@@ -374,7 +374,7 @@ function openBackup(){
     prog('백업 생성 중…');
     try{const sites=await S.sites();const photos=await S.allPhotos();const out={v:1,exported:Date.now(),settings,sites,photos:[]};
       for(const p of photos){out.photos.push({...p,blob:await blobToB64(p.blob)});}
-      prog(null);await saveFile(`현장스냅_백업_${fmtD(new Date())}.json`,JSON.stringify(out));closeModal();toast('백업 저장됨');}
+      prog(null);await saveFile(`현장사진어플_백업_${fmtD(new Date())}.json`,JSON.stringify(out));closeModal();toast('백업 저장됨');}
     catch(e){prog(null);$('bkNote').textContent=e.code==='declined'?'취소됨':'실패: '+(e.message||e.code||e);}
   };
 }
@@ -409,7 +409,7 @@ function closeModal(){$('modal').innerHTML='';}
 /* ---------- access gate ---------- */
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function gate(){return new Promise(res=>{
-  $('hdr').innerHTML='<h1>현장스냅 <span class="sub">접근코드 입력</span></h1>';$('bar').innerHTML='';
+  $('hdr').innerHTML='<h1>현장사진어플 <span class="sub">접근코드 입력</span></h1>';$('bar').innerHTML='';
   $('main').innerHTML=`<div class="card" style="margin-top:20px"><label class="lbl" for="acIn">관리자에게 받은 접근코드</label><input class="in" id="acIn" autocomplete="off" inputmode="text" placeholder="코드 입력"><button class="btn" id="acGo" style="width:100%;margin-top:10px">확인</button><div class="note" id="acNote">허용된 사용자만 이용할 수 있습니다.</div></div>`;
   const tryIt=async()=>{const v=$('acIn').value.trim();if(!v)return;const h=await sha256(v);
     if((window.ACCESS_HASHES||[]).includes(h)){try{localStorage.setItem('fs_auth',h)}catch(e){}res(true);}else{$('acNote').textContent='코드가 올바르지 않습니다.';$('acNote').style.color='var(--danger)';}};

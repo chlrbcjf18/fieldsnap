@@ -1,6 +1,6 @@
 {
   "appId": "kr.fieldsnap.app",
-  "appName": "현장스냅",
+  "appName": "현장사진어플",
   "webDir": "www",
   "android": { "allowMixedContent": false },
   "server": { "androidScheme": "https" }

@@ -21,18 +21,18 @@ jobs:
           npx cap add android
           # permissions: camera (file input capture), location (GPS stamp)
           sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />#' android/app/src/main/AndroidManifest.xml
-          sed -i 's#"name">.*</string>#"name">현장스냅</string>#' android/app/src/main/res/values/strings.xml || true
+          sed -i 's#"name">.*</string>#"name">현장사진어플</string>#' android/app/src/main/res/values/strings.xml || true
           npx cap sync android
       - name: Build debug APK
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
       - name: Rename
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk 현장스냅.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk 현장사진어플.apk
       - uses: actions/upload-artifact@v4
-        with: { name: fieldsnap-apk, path: 현장스냅.apk }
+        with: { name: fieldsnap-apk, path: 현장사진어플.apk }
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: 현장스냅 APK #${{ github.run_number }}
-          files: 현장스냅.apk
+          name: 현장사진어플 APK #${{ github.run_number }}
+          files: 현장사진어플.apk
           body: "설정 > 보안 > 출처를 알 수 없는 앱 허용 후 설치. 접근코드가 있어야 사용 가능."

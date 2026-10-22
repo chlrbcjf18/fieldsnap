@@ -1,6 +1,6 @@
 {
-  "name": "현장스냅",
-  "short_name": "현장스냅",
+  "name": "현장사진어플",
+  "short_name": "현장사진어플",
   "description": "현장 사진 자동 번호·부재코드·메모 정리",
   "start_url": "./index.html",
   "scope": "./",
