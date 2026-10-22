@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0f6e56">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="현장스냅">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>현장스냅</title>
+<style>html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: single-screen mobile tool. Sticky header, scrolling content, fixed bottom action bar. */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --fg:#17201d; --muted:#5f6b67; --line:#d6ddda;
+  --accent:#0f6e56; --accent-fg:#ffffff; --accent-soft:#dcefe8;
+  --warn:#b45309; --warn-soft:#fdf0dc; --danger:#b42318; --danger-soft:#fde7e5;
+  --font:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101514; --surface:#1a211f; --fg:#e8eeec; --muted:#9aa7a2; --line:#2d3835;
+  --accent:#3fb28f; --accent-fg:#06110d; --accent-soft:#17352c;
+  --warn:#f0a44a; --warn-soft:#3a2a12; --danger:#f0756b; --danger-soft:#3d1a17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101514; --surface:#1a211f; --fg:#e8eeec; --muted:#9aa7a2; --line:#2d3835;
+  --accent:#3fb28f; --accent-fg:#06110d; --accent-soft:#17352c;
+  --warn:#f0a44a; --warn-soft:#3a2a12; --danger:#f0756b; --danger-soft:#3d1a17; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.45;display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;min-height:52px;padding-block:6px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hdr h1{font-size:17px;font-weight:700;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr .sub{font-size:12px;color:var(--muted);font-weight:400;display:block}
+.ib{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:var(--fg);flex:none}
+.ib:active{background:var(--accent-soft)}
+.ib svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+main{flex:1;overflow-y:auto;padding-block:14px 110px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:1px solid var(--line);display:flex;gap:10px;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 16px;border-radius:12px;font-weight:700;background:var(--accent);color:var(--accent-fg);flex:1}
+.btn.sec{background:var(--accent-soft);color:var(--accent)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg);font-weight:500}
+.btn.danger{background:var(--danger-soft);color:var(--danger)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px;flex:none}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn:disabled{opacity:.45}
+.stack{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.site{display:flex;align-items:center;gap:12px;width:100%;text-align:left}
+.site .n{flex:1;min-width:0}
+.site .t{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.site .m{font-size:13px;color:var(--muted)}
+.site .cnt{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--accent);background:var(--accent-soft);padding:4px 9px;border-radius:8px;flex:none}
+.empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:14px}
+.empty b{display:block;color:var(--fg);font-size:16px;margin-bottom:6px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip .k{font-family:var(--mono);font-weight:600}
+.chip .c{opacity:.7;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media (min-width:520px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media (min-width:760px){.grid{grid-template-columns:repeat(6,1fr)}}
+.ph{position:relative;aspect-ratio:1;max-width:100%;border-radius:8px;overflow:hidden;background:var(--line);width:100%}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .tag{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.ph .memo{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#ffd166}
+.gap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--warn);align-items:center}
+.gap span{font-family:var(--mono);background:var(--warn-soft);padding:2px 6px;border-radius:6px}
+.lbl{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.02em;display:block;margin-bottom:5px}
+.in{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;min-height:44px}
+textarea.in{min-height:84px;resize:vertical}
+.row{display:flex;gap:10px}
+.row>*{flex:1;min-width:0}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:720px;max-height:92%;overflow-y:auto;border-radius:18px 18px 0 0;padding-block:14px calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet h2{font-size:17px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.sheet h2 .id{font-family:var(--mono);color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:8px;font-size:14px}
+.sheet .acts{display:flex;gap:10px;margin-top:14px}
+.big{width:100%;max-height:52vh;object-fit:contain;border-radius:12px;background:#000;display:block}
+.meta{font-size:12px;color:var(--muted);font-family:var(--mono);margin:8px 0 12px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.codes{display:flex;flex-wrap:wrap;gap:8px}
+.cpick{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;display:flex;flex-direction:column;align-items:flex-start;min-width:84px}
+.cpick.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.cpick .k{font-family:var(--mono);font-weight:600}
+.cpick .nx{font-size:11px;opacity:.75}
+.sw{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);gap:10px}
+.sw:last-child{border-bottom:0}
+.sw input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.sw .d{font-size:12px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;z-index:30;max-width:90%;text-align:center}
+.prog{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25;display:grid;place-items:center;color:#fff;font-weight:700}
+.codelist{display:flex;flex-direction:column;gap:6px}
+.codelist .r{display:flex;gap:8px;align-items:center}
+.codelist .r .in{flex:1}
+.codelist .r .k{width:92px;flex:none;font-family:var(--mono);text-transform:uppercase}
+.codelist .r button{color:var(--danger);width:36px;flex:none}
+.hint{font-size:12px;color:var(--muted);line-height:1.5}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:0}}}
+</style>
+
+</head>
+<body>
+<header class="hdr" id="hdr"></header>
+<main id="main"></main>
+<div class="bar" id="bar"></div>
+<div id="modal"></div>
+<input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+<input type="file" id="galIn" accept="image/*" multiple hidden>
+<input type="file" id="bakIn" accept=".json,application/json" hidden>
+
+<script src="jszip.min.js"></script>
+<script src="access.js"></script>
+<script>
+/* ---------- storage (IndexedDB) ---------- */
+const DBN='fieldsnap-v1';
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open(DBN,1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('sites',{keyPath:'id'});const p=d.createObjectStore('photos',{keyPath:'id'});p.createIndex('site','site');d.createObjectStore('kv',{keyPath:'k'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+let _db;async function db(){return _db||(_db=await idb());}
+function tx(store,mode,fn){return db().then(d=>new Promise((res,rej)=>{const t=d.transaction(store,mode);const s=t.objectStore(store);const out=fn(s);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out);t.onerror=()=>rej(t.error);}));}
+const S={
+  sites:()=>tx('sites','readonly',s=>s.getAll()),
+  putSite:v=>tx('sites','readwrite',s=>s.put(v)),
+  delSite:id=>tx('sites','readwrite',s=>s.delete(id)),
+  photos:site=>tx('photos','readonly',s=>s.index('site').getAll(site)),
+  allPhotos:()=>tx('photos','readonly',s=>s.getAll()),
+  putPhoto:v=>tx('photos','readwrite',s=>s.put(v)),
+  delPhoto:id=>tx('photos','readwrite',s=>s.delete(id)),
+  getKV:k=>tx('kv','readonly',s=>s.get(k)).then(r=>r&&r.v),
+  setKV:(k,v)=>tx('kv','readwrite',s=>s.put({k,v})),
+};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ---------- defaults ---------- */
+const PRESETS={
+  교량:[['DK','바닥판'],['GD','거더'],['CB','가로보'],['AB','교대'],['PR','교각'],['BR','받침'],['EJ','신축이음'],['RL','난간·방호벽'],['DR','배수시설'],['PV','교면포장'],['ET','기타']],
+  터널:[['LN','라이닝'],['PT','포털'],['IV','인버트·노면'],['DR','배수·누수'],['AC','부대시설'],['ET','기타']],
+  옹벽:[['WL','벽체'],['FD','기초'],['JT','줄눈'],['DR','배수공'],['BF','배면·전면'],['ET','기타']],
+  일반:[['A','구역A'],['B','구역B'],['ET','기타']]
+};
+let settings={stamp:true,stampGps:true,maxPx:2000,quality:0.86};
+let lastPos=null;
+function watchGps(){if(!navigator.geolocation)return;try{navigator.geolocation.watchPosition(p=>{lastPos=p.coords;},()=>{},{enableHighAccuracy:true,maximumAge:15000,timeout:20000});}catch(e){}}
+const fmtGps=c=>c?`${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}${c.accuracy?` (±${Math.round(c.accuracy)}m)`:''}`:'';
+const fmtDT=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+const fmtD=d=>fmtDT(d).slice(0,10);
+const pad3=n=>String(n).padStart(3,'0');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const safeName=s=>String(s||'').replace(/[\\/:*?"<>|\r\n]/g,'_').trim().slice(0,40);
+
+/* ---------- state / router ---------- */
+let view={name:'home'};let curSite=null;let curPhotos=[];let filter='ALL';let urlCache=new Map();
+function imgURL(p){if(!urlCache.has(p.id))urlCache.set(p.id,URL.createObjectURL(p.blob));return urlCache.get(p.id);}
+const $=id=>document.getElementById(id);
+function toast(m,ms=2200){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),ms);}
+function prog(m){let p=$('prog');if(!m){p&&p.remove();return;}if(!p){p=document.createElement('div');p.id='prog';p.className='prog';document.body.appendChild(p);}p.textContent=m;}
+const I={
+  back:'<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>',
+  gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  cam:'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  out:'<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+  img:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+  more:'<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>'
+};
+async function go(v){view=v;if(v.name==='site'){const sites=await S.sites();curSite=sites.find(s=>s.id===v.id);curPhotos=(await S.photos(v.id)).sort((a,b)=>a.ts-b.ts);filter='ALL';}render();}
+
+/* ---------- render ---------- */
+async function render(){
+  if(view.name==='home')return renderHome();
+  if(view.name==='site')return renderSite();
+}
+async function renderHome(){
+  const sites=(await S.sites()).sort((a,b)=>b.updated-a.updated);
+  const all=await S.allPhotos();const cnt={};all.forEach(p=>cnt[p.site]=(cnt[p.site]||0)+1);
+  $('hdr').innerHTML=`<h1>현장스냅 <span class="sub">현장별 사진 자동 번호·정리</span></h1><button class="ib" id="setBtn" aria-label="설정">${I.gear}</button>`;
+  $('setBtn').onclick=openSettings;
+  $('main').innerHTML=sites.length?`<div class="stack">${sites.map(s=>`<button class="card site" data-id="${s.id}"><div class="n"><div class="t">${esc(s.name)}</div><div class="m">${esc(s.type)} · ${esc(s.date)}${s.facility?' · '+esc(s.facility):''}</div></div><div class="cnt">${cnt[s.id]||0}장</div></button>`).join('')}</div>`
+    :`<div class="empty"><b>등록된 현장이 없습니다</b>아래 버튼으로 현장(용역)을 만들고 촬영을 시작하세요.<br>촬영 즉시 부재코드별 번호가 붙습니다. 예: <span style="font-family:var(--mono)">GD-003</span></div>`;
+  $('main').querySelectorAll('.site').forEach(b=>b.onclick=()=>go({name:'site',id:b.dataset.id}));
+  $('bar').innerHTML=`<button class="btn" id="newSite">${I.plus} 새 현장</button><button class="btn ghost" id="bakBtn" style="flex:0 0 auto">백업·복원</button>`;
+  $('newSite').onclick=()=>openSiteForm();$('bakBtn').onclick=openBackup;
+}
+function nextSeq(code){let m=0;curPhotos.forEach(p=>{if(p.code===code&&p.seq>m)m=p.seq;});const held=curSite.counters?.[code]||0;return Math.max(m,held)+1;}
+function missing(code){const seqs=curPhotos.filter(p=>p.code===code).map(p=>p.seq);if(!seqs.length)return [];const max=Math.max(...seqs,curSite.counters?.[code]||0);const set=new Set(seqs);const out=[];for(let i=1;i<=max;i++)if(!set.has(i))out.push(i);return out;}
+function renderSite(){
+  const s=curSite;if(!s)return go({name:'home'});
+  $('hdr').innerHTML=`<button class="ib" id="back" aria-label="뒤로">${I.back}</button><h1>${esc(s.name)}<span class="sub">${esc(s.type)} · ${esc(s.date)} · ${curPhotos.length}장</span></h1><button class="ib" id="siteMenu" aria-label="현장 메뉴">${I.more}</button>`;
+  $('back').onclick=()=>go({name:'home'});$('siteMenu').onclick=openSiteMenu;
+  const codeCnt={};curPhotos.forEach(p=>codeCnt[p.code]=(codeCnt[p.code]||0)+1);
+  const chips=[['ALL','전체',curPhotos.length],...s.codes.map(([k,n])=>[k,n,codeCnt[k]||0])];
+  let list=filter==='ALL'?curPhotos:curPhotos.filter(p=>p.code===filter);
+  list=[...list].sort((a,b)=>a.code===b.code?b.seq-a.seq:a.code.localeCompare(b.code));
+  if(filter==='ALL')list=[...curPhotos].sort((a,b)=>b.ts-a.ts);
+  const miss=filter==='ALL'?s.codes.flatMap(([k])=>missing(k).map(n=>`${k}-${pad3(n)}`)):missing(filter).map(n=>`${filter}-${pad3(n)}`);
+  $('main').innerHTML=`<div class="chips">${chips.map(([k,n,c])=>`<button class="chip ${filter===k?'on':''}" data-k="${k}"><span class="k">${k==='ALL'?'ALL':k}</span>${esc(n)}<span class="c">${c}</span></button>`).join('')}</div>
+  ${miss.length?`<div class="gap">결번 ${miss.length}건 ${miss.slice(0,12).map(m=>`<span>${m}</span>`).join('')}${miss.length>12?'…':''}</div>`:''}
+  ${list.length?`<div class="grid">${list.map(p=>`<button class="ph" data-id="${p.id}"><img src="${imgURL(p)}" alt="${p.code}-${pad3(p.seq)}" loading="lazy">${p.memo?'<span class="memo"></span>':''}<span class="tag">${p.code}-${pad3(p.seq)}${p.memo?' '+esc(p.memo):''}</span></button>`).join('')}</div>`
+  :`<div class="empty"><b>아직 사진이 없습니다</b>촬영 버튼을 누르면 폰 기본 카메라가 열리고, 찍은 사진에 자동으로 번호가 붙습니다.</div>`}`;
+  $('main').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{filter=b.dataset.k;renderSite();});
+  $('main').querySelectorAll('.ph').forEach(b=>b.onclick=()=>openPhoto(b.dataset.id));
+  $('bar').innerHTML=`<button class="btn sec" id="galBtn" style="flex:0 0 auto" aria-label="갤러리에서 가져오기">${I.img}</button><button class="btn" id="camBtn">${I.cam} 촬영</button><button class="btn sec" id="expBtn" style="flex:0 0 auto" aria-label="내보내기">${I.out}</button>`;
+  $('camBtn').onclick=()=>pickCode('cam');$('galBtn').onclick=()=>pickCode('gal');$('expBtn').onclick=openExport;
+}
+
+/* ---------- code pick → capture ---------- */
+let pendingCode=null;
+function pickCode(src){
+  const s=curSite;const pre=filter!=='ALL'?filter:(s.lastCode||s.codes[0][0]);
+  modal(`<h2>부재코드 선택</h2><div class="codes">${s.codes.map(([k,n])=>`<button class="cpick ${k===pre?'on':''}" data-k="${k}"><span class="k">${k}</span><span>${esc(n)}</span><span class="nx">다음 ${k}-${pad3(nextSeq(k))}</span></button>`).join('')}</div>
+  <div class="hint" style="margin-top:12px">${src==='cam'?'선택 후 폰 기본 카메라가 열립니다. 손떨림방지·HDR 등 카메라 설정이 그대로 적용됩니다.':'갤러리에서 여러 장을 선택하면 선택 순서대로 번호가 붙습니다.'}</div>
+  <div class="acts"><button class="btn ghost" id="mcancel">취소</button><button class="btn" id="mgo">${src==='cam'?'카메라 열기':'갤러리 열기'}</button></div>`);
+  let sel=pre;document.querySelectorAll('.cpick').forEach(b=>b.onclick=()=>{sel=b.dataset.k;document.querySelectorAll('.cpick').forEach(x=>x.classList.toggle('on',x.dataset.k===sel));});
+  $('mcancel').onclick=closeModal;
+  $('mgo').onclick=()=>{pendingCode=sel;closeModal();(src==='cam'?$('camIn'):$('galIn')).click();};
+}
+$('camIn').onchange=e=>ingest([...e.target.files]).then(()=>e.target.value='');
+$('galIn').onchange=e=>ingest([...e.target.files]).then(()=>e.target.value='');
+async function ingest(files){
+  if(!files.length||!pendingCode||!curSite)return;
+  const code=pendingCode;let last=null;
+  for(let i=0;i<files.length;i++){
+    prog(`처리 중 ${i+1}/${files.length}`);
+    const seq=nextSeq(code);
+    try{
+      const blob=await processImage(files[i],{code,seq,site:curSite});
+      const p={id:uid(),site:curSite.id,code,seq,ts:Date.now(),memo:'',blob,w:0,h:0,lat:lastPos?lastPos.latitude:null,lng:lastPos?lastPos.longitude:null};
+      await S.putPhoto(p);curPhotos.push(p);last=p;
+    }catch(err){console.error(err);toast('이미지 처리 실패: '+(err.message||err));}
+  }
+  prog(null);
+  curSite.lastCode=code;curSite.updated=Date.now();await S.putSite(curSite);
+  renderSite();
+  if(last)openPhoto(last.id,true);
+}
+async function loadBitmap(file){
+  try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(e){}
+  return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im);};im.onerror=rej;im.src=u;});
+}
+async function processImage(file,{code,seq,site}){
+  const bm=await loadBitmap(file);
+  const W=bm.width,H=bm.height;const sc=Math.min(1,settings.maxPx/Math.max(W,H));
+  const w=Math.round(W*sc),h=Math.round(H*sc);
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+  g.drawImage(bm,0,0,w,h);if(bm.close)bm.close();
+  if(settings.stamp){
+    const fs=Math.max(18,Math.round(w*0.028));const padd=Math.round(fs*0.6);
+    const id=`${code}-${pad3(seq)}`;const line2=`${site.name}${site.facility?' · '+site.facility:''}  ${fmtDT(new Date())}${settings.stampGps&&lastPos?'  '+lastPos.latitude.toFixed(5)+', '+lastPos.longitude.toFixed(5):''}`;
+    g.font=`700 ${fs}px ${getComputedStyle(document.body).fontFamily}`;
+    const bh=fs*2+padd*3;
+    g.fillStyle='rgba(0,0,0,.55)';g.fillRect(0,h-bh,w,bh);
+    g.fillStyle='#ffd166';g.textBaseline='top';g.fillText(id,padd,h-bh+padd);
+    g.fillStyle='#fff';g.font=`500 ${Math.round(fs*0.8)}px ${getComputedStyle(document.body).fontFamily}`;g.fillText(line2,padd,h-bh+padd*2+fs);
+  }
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',settings.quality));
+  if(!blob)throw new Error('인코딩 실패');return blob;
+}
+
+/* ---------- photo detail ---------- */
+function openPhoto(id,fresh=false){
+  const p=curPhotos.find(x=>x.id===id);if(!p)return;
+  modal(`<h2><span class="id">${p.code}-${pad3(p.seq)}</span>${esc(curSite.codes.find(c=>c[0]===p.code)?.[1]||'')}</h2>
+  <img class="big" src="${imgURL(p)}" alt="">
+  <div class="meta"><span>${fmtDT(new Date(p.ts))}</span><span>${(p.blob.size/1024).toFixed(0)} KB</span>${p.lat!=null?`<span>${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</span>`:''}</div>
+  <label class="lbl" for="memoIn">메모 (손상 내용·위치·크기)</label>
+  <textarea class="in" id="memoIn" placeholder="예: 바닥판 하면 폭 0.3mm 균열, L=1.2m">${esc(p.memo)}</textarea>
+  <div class="acts"><button class="btn danger" id="pdel" style="flex:0 0 auto">삭제</button><button class="btn" id="psave">${fresh?'메모 저장':'저장'}</button></div>
+  <div class="note">삭제하면 이 번호는 결번으로 남고 다른 사진에 재사용되지 않습니다.</div>`);
+  if(fresh)setTimeout(()=>$('memoIn').focus(),100);
+  $('psave').onclick=async()=>{p.memo=$('memoIn').value.trim();await S.putPhoto(p);closeModal();renderSite();toast('저장됨');};
+  $('pdel').onclick=()=>{
+    $('pdel').outerHTML=`<button class="btn danger" id="pdel2" style="flex:0 0 auto">정말 삭제</button>`;
+    $('pdel2').onclick=async()=>{curSite.counters=curSite.counters||{};curSite.counters[p.code]=Math.max(curSite.counters[p.code]||0,p.seq);await S.putSite(curSite);await S.delPhoto(p.id);curPhotos=curPhotos.filter(x=>x.id!==p.id);closeModal();renderSite();toast(`${p.code}-${pad3(p.seq)} 삭제 (결번)`);};
+  };
+}
+
+/* ---------- site form ---------- */
+function openSiteForm(site){
+  const s=site||{id:uid(),name:'',facility:'',type:'교량',date:fmtD(new Date()),codes:PRESETS['교량'].map(x=>[...x]),counters:{},updated:Date.now()};
+  const codeRows=()=>s.codes.map((c,i)=>`<div class="r"><input class="in k" value="${esc(c[0])}" data-i="${i}" data-f="0" maxlength="4" aria-label="코드"><input class="in" value="${esc(c[1])}" data-i="${i}" data-f="1" aria-label="부재명"><button data-del="${i}" aria-label="삭제">✕</button></div>`).join('');
+  modal(`<h2>${site?'현장 정보 수정':'새 현장'}</h2><div class="stack">
+  <div><label class="lbl" for="fName">현장명 (용역명)</label><input class="in" id="fName" value="${esc(s.name)}" placeholder="예: 2026 ○○군 정밀안전진단"></div>
+  <div><label class="lbl" for="fFac">시설물명</label><input class="in" id="fFac" value="${esc(s.facility)}" placeholder="예: 백천교"></div>
+  <div class="row"><div><label class="lbl" for="fType">시설물 종류</label><select class="in" id="fType">${Object.keys(PRESETS).map(k=>`<option ${s.type===k?'selected':''}>${k}</option>`).join('')}</select></div><div><label class="lbl" for="fDate">점검일</label><input class="in" id="fDate" type="date" value="${esc(s.date)}"></div></div>
+  <div><label class="lbl">부재코드 ${site?'(사진이 있는 코드는 코드값 변경 주의)':''}</label><div class="codelist" id="codeList">${codeRows()}</div><button class="btn ghost sm" id="addCode" style="margin-top:8px">+ 코드 추가</button><div class="hint" style="margin-top:6px">종류를 바꾸면 기본 코드로 초기화됩니다.</div></div>
+  </div><div class="acts">${site?`<button class="btn danger" id="sdel" style="flex:0 0 auto">현장 삭제</button>`:''}<button class="btn ghost" id="mcancel">취소</button><button class="btn" id="ssave">저장</button></div>`);
+  const syncCodes=()=>{document.querySelectorAll('#codeList input').forEach(i=>{s.codes[+i.dataset.i][+i.dataset.f]=i.value.trim();});};
+  const bind=()=>{document.querySelectorAll('#codeList [data-del]').forEach(b=>b.onclick=()=>{syncCodes();s.codes.splice(+b.dataset.del,1);$('codeList').innerHTML=codeRows();bind();});};
+  bind();
+  $('fType').onchange=e=>{s.codes=PRESETS[e.target.value].map(x=>[...x]);$('codeList').innerHTML=codeRows();bind();};
+  $('addCode').onclick=()=>{syncCodes();s.codes.push(['','']);$('codeList').innerHTML=codeRows();bind();$('codeList').lastElementChild.querySelector('input').focus();};
+  $('mcancel').onclick=closeModal;
+  $('ssave').onclick=async()=>{
+    syncCodes();s.name=$('fName').value.trim();s.facility=$('fFac').value.trim();s.type=$('fType').value;s.date=$('fDate').value;
+    s.codes=s.codes.map(([k,n])=>[k.toUpperCase(),n]).filter(([k,n])=>k&&n);
+    if(!s.name)return toast('현장명을 입력하세요');
+    if(!s.codes.length)return toast('부재코드가 1개 이상 필요합니다');
+    const dup=s.codes.map(c=>c[0]).filter((k,i,a)=>a.indexOf(k)!==i);if(dup.length)return toast('중복 코드: '+dup[0]);
+    s.updated=Date.now();await S.putSite(s);closeModal();if(site){curSite=s;renderSite();}else go({name:'site',id:s.id});
+  };
+  if(site)$('sdel').onclick=()=>{$('sdel').outerHTML=`<button class="btn danger" id="sdel2" style="flex:0 0 auto">사진 ${curPhotos.length}장 포함 삭제</button>`;$('sdel2').onclick=async()=>{for(const p of curPhotos)await S.delPhoto(p.id);await S.delSite(s.id);closeModal();go({name:'home'});toast('현장 삭제됨');};};
+}
+function openSiteMenu(){
+  modal(`<h2>${esc(curSite.name)}</h2><div class="stack">
+  <button class="btn ghost" id="mEdit">현장 정보·부재코드 수정</button>
+  <button class="btn ghost" id="mExp">내보내기 (ZIP + 사진대장)</button>
+  <button class="btn ghost" id="mcancel">닫기</button></div>`);
+  $('mEdit').onclick=()=>{closeModal();openSiteForm(curSite);};$('mExp').onclick=()=>{closeModal();openExport();};$('mcancel').onclick=closeModal;
+}
+
+/* ---------- export ---------- */
+let dl=null;
+async function openExport(){
+  const n=curPhotos.length;
+  modal(`<h2>내보내기</h2>
+  <div class="hint">파일명 규칙: <span style="font-family:var(--mono)">${esc(safeName(curSite.facility||curSite.name))}_GD-003_메모.jpg</span><br>사진대장.csv(엑셀용, 번호·부재·메모·촬영일시)가 함께 들어갑니다.</div>
+  <div class="sw" style="margin-top:10px"><div><div>현재 필터만 내보내기</div><div class="d">${filter==='ALL'?'전체 '+n+'장':filter+' '+curPhotos.filter(p=>p.code===filter).length+'장'}</div></div><input type="checkbox" id="exFilt" ${filter==='ALL'?'disabled':'checked'}></div>
+  <div class="acts"><button class="btn ghost" id="mcancel">취소</button><button class="btn" id="exGo" ${n?'':'disabled'}>ZIP 저장</button></div>
+  <div class="note" id="exNote"></div>`);
+  $('mcancel').onclick=closeModal;
+  $('exGo').onclick=async()=>{
+    const only=$('exFilt').checked&&filter!=='ALL';
+    const list=(only?curPhotos.filter(p=>p.code===filter):curPhotos).slice().sort((a,b)=>a.code===b.code?a.seq-b.seq:a.code.localeCompare(b.code));
+    $('exGo').disabled=true;prog('ZIP 생성 중…');
+    try{
+      const zip=new JSZip();const base=safeName(curSite.facility||curSite.name);const nameOf=p=>`${base}_${p.code}-${pad3(p.seq)}${p.memo?'_'+safeName(p.memo):''}.jpg`;
+      const codeName=k=>curSite.codes.find(c=>c[0]===k)?.[1]||'';
+      const rows=[['번호','부재코드','부재명','메모','촬영일시','위도','경도','파일명']];
+      list.forEach(p=>{zip.file(nameOf(p),p.blob);rows.push([`${p.code}-${pad3(p.seq)}`,p.code,codeName(p.code),p.memo,fmtDT(new Date(p.ts)),p.lat??'',p.lng??'',nameOf(p)]);});
+      const gaps=curSite.codes.flatMap(([k])=>missing(k).map(n=>`${k}-${pad3(n)}`));
+      const csv='﻿'+[['현장명',curSite.name],['시설물',curSite.facility],['종류',curSite.type],['점검일',curSite.date],['결번',gaps.join(' ')],[]].concat(rows).map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+      zip.file('사진대장.csv',csv);
+      const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
+      prog(null);
+      const fn=`${base}_${curSite.date}${only?'_'+filter:''}.zip`;
+      await saveFile(fn,blob);
+      closeModal();toast(`저장됨 · ${list.length}장`);
+    }catch(e){prog(null);$('exGo').disabled=false;$('exNote').textContent=e.code==='declined'?'저장을 취소했습니다.':'저장 실패: '+(e.message||e.code||e);}
+  };
+}
+async function saveFile(filename,data){
+  const blob=data instanceof Blob?data:new Blob([data]);
+  const cap=window.Capacitor;
+  if(cap&&cap.isNativePlatform&&cap.isNativePlatform()){
+    const FS=cap.Plugins&&cap.Plugins.Filesystem;if(!FS)throw new Error('파일 플러그인 없음');
+    const b64=await blobToB64(blob);
+    const r=await FS.writeFile({path:'현장스냅/'+filename,data:b64,directory:'DOCUMENTS',recursive:true});
+    const Sh=cap.Plugins&&cap.Plugins.Share;
+    if(Sh){try{await Sh.share({title:filename,files:[r.uri]});}catch(e){}}
+    toast('내 파일 > Documents > 현장스냅 에 저장됨',3500);return {status:'saved'};
+  }
+  const f=new File([blob],filename,{type:blob.type||'application/octet-stream'});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:filename});return {status:'saved'};}catch(e){if(e.name==='AbortError')throw Object.assign(new Error('취소'),{code:'declined'});}}
+  const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u);},4000);
+  return {status:'saved'};
+}
+
+/* ---------- backup / restore ---------- */
+function openBackup(){
+  modal(`<h2>백업·복원</h2><div class="hint">모든 현장과 사진을 JSON 한 파일로 저장합니다. 폰 교체·분실 대비용이며, 사진은 Base64로 담겨 원본보다 약 1.3배 큽니다. 복원은 기존 데이터에 추가(병합)됩니다.</div>
+  <div class="acts"><button class="btn ghost" id="mcancel">닫기</button><button class="btn sec" id="bkRes">복원</button><button class="btn" id="bkGo">백업 저장</button></div><div class="note" id="bkNote"></div>`);
+  $('mcancel').onclick=closeModal;
+  $('bkRes').onclick=()=>$('bakIn').click();
+  $('bkGo').onclick=async()=>{
+    prog('백업 생성 중…');
+    try{const sites=await S.sites();const photos=await S.allPhotos();const out={v:1,exported:Date.now(),settings,sites,photos:[]};
+      for(const p of photos){out.photos.push({...p,blob:await blobToB64(p.blob)});}
+      prog(null);await saveFile(`현장스냅_백업_${fmtD(new Date())}.json`,JSON.stringify(out));closeModal();toast('백업 저장됨');}
+    catch(e){prog(null);$('bkNote').textContent=e.code==='declined'?'취소됨':'실패: '+(e.message||e.code||e);}
+  };
+}
+$('bakIn').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;prog('복원 중…');
+  try{const j=JSON.parse(await f.text());if(!j.sites)throw new Error('백업 파일이 아닙니다');
+    for(const s of j.sites)await S.putSite(s);
+    for(const p of j.photos){p.blob=b64ToBlob(p.blob);await S.putPhoto(p);}
+    if(j.settings){settings={...settings,...j.settings};await S.setKV('settings',settings);}
+    prog(null);closeModal();toast(`복원 완료 · 현장 ${j.sites.length} / 사진 ${j.photos.length}`);render();
+  }catch(err){prog(null);toast('복원 실패: '+err.message);}
+};
+const blobToB64=b=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result.split(',')[1]);fr.readAsDataURL(b);});
+function b64ToBlob(s){const bin=atob(s);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:'image/jpeg'});}
+
+/* ---------- settings ---------- */
+function openSettings(){
+  modal(`<h2>설정</h2>
+  <div class="sw"><div><div>사진에 번호·현장·일시 스탬프</div><div class="d">사진 하단에 ${'GD-003'} / 현장명 / 촬영일시를 새깁니다</div></div><input type="checkbox" id="stStamp" ${settings.stamp?'checked':''}></div>
+  <div class="sw"><div><div>GPS 좌표 스탬프·기록</div><div class="d">위치 권한을 허용해야 합니다. 현재: <span id="gpsNow">${fmtGps(lastPos)||'수신 대기'}</span></div></div><input type="checkbox" id="stGps" ${settings.stampGps?'checked':''}></div>
+  <div class="sw"><div><div>저장 해상도 (긴 변)</div><div class="d">보고서용은 2000px이면 충분합니다</div></div><select class="in" id="stPx" style="width:120px">${[1600,2000,2500,3000,4000].map(v=>`<option ${settings.maxPx===v?'selected':''}>${v}</option>`).join('')}</select></div>
+  <div class="sw"><div><div>JPEG 품질</div></div><select class="in" id="stQ" style="width:120px">${[0.8,0.86,0.92].map(v=>`<option value="${v}" ${settings.quality===v?'selected':''}>${Math.round(v*100)}%</option>`).join('')}</select></div>
+  <div class="hint" style="margin-top:12px">촬영은 폰 기본 카메라 앱으로 이뤄지므로 손떨림방지(OIS/EIS)·HDR 등은 카메라 설정을 따릅니다. 데이터는 이 폰의 브라우저 안에만 저장됩니다. 브라우저 데이터 삭제 시 사라지니 주기적으로 백업하세요.</div>
+  <div class="acts"><button class="btn ghost" id="stOut" style="flex:0 0 auto">접근코드 해제</button><button class="btn ghost" id="mcancel">닫기</button><button class="btn" id="stSave">저장</button></div>`);
+  $('mcancel').onclick=closeModal;$('stOut').onclick=()=>{try{localStorage.removeItem('fs_auth')}catch(e){}location.reload();};
+  $('stSave').onclick=async()=>{settings.stamp=$('stStamp').checked;settings.stampGps=$('stGps').checked;settings.maxPx=+$('stPx').value;settings.quality=+$('stQ').value;await S.setKV('settings',settings);if(settings.stampGps)watchGps();closeModal();toast('설정 저장됨');};
+}
+
+/* ---------- modal ---------- */
+function modal(html){$('modal').innerHTML=`<div class="sheet-bg" id="sbg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;$('sbg').onclick=e=>{if(e.target.id==='sbg')closeModal();};}
+function closeModal(){$('modal').innerHTML='';}
+
+/* ---------- access gate ---------- */
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function gate(){return new Promise(res=>{
+  $('hdr').innerHTML='<h1>현장스냅 <span class="sub">접근코드 입력</span></h1>';$('bar').innerHTML='';
+  $('main').innerHTML=`<div class="card" style="margin-top:20px"><label class="lbl" for="acIn">관리자에게 받은 접근코드</label><input class="in" id="acIn" autocomplete="off" inputmode="text" placeholder="코드 입력"><button class="btn" id="acGo" style="width:100%;margin-top:10px">확인</button><div class="note" id="acNote">허용된 사용자만 이용할 수 있습니다.</div></div>`;
+  const tryIt=async()=>{const v=$('acIn').value.trim();if(!v)return;const h=await sha256(v);
+    if((window.ACCESS_HASHES||[]).includes(h)){try{localStorage.setItem('fs_auth',h)}catch(e){}res(true);}else{$('acNote').textContent='코드가 올바르지 않습니다.';$('acNote').style.color='var(--danger)';}};
+  $('acGo').onclick=tryIt;$('acIn').onkeydown=e=>{if(e.key==='Enter')tryIt();};setTimeout(()=>$('acIn').focus(),100);
+});}
+async function checkAuth(){let h=null;try{h=localStorage.getItem('fs_auth')}catch(e){}
+  if(h&&(window.ACCESS_HASHES||[]).includes(h))return true;
+  if(h){try{localStorage.removeItem('fs_auth')}catch(e){}}
+  return gate();}
+
+/* ---------- boot ---------- */
+(async()=>{
+  if('serviceWorker' in navigator&&location.protocol==='https:'){try{navigator.serviceWorker.register('sw.js');}catch(e){}}
+  await checkAuth();
+  try{const s=await S.getKV('settings');if(s)settings={...settings,...s};}catch(e){}
+  if(settings.stampGps)watchGps();
+  try{await render();}catch(e){$('main').innerHTML=`<div class="empty"><b>저장소를 열 수 없습니다</b>시크릿 모드이거나 브라우저 저장소가 차단된 상태입니다. 일반 창에서 열어주세요.</div>`;}
+})();
+</script>
+</body>
+</html>
